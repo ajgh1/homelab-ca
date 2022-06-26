@@ -1,0 +1,50 @@
+#!/bin/bash
+
+. ./cavars
+
+MYCERT=$1
+MYSHORTNAME=$(echo $MYCERT|cut -d. -f1)
+MYIP=$2
+
+echo "FQDN=$MYCERT"
+echo "SHORTNAME=$MYSHORTNAME"
+
+# create cert request (unless there already *is* a request!)
+if [ ! -f "$MYCERT.csr.pem" ]
+then
+    echo "Generating certificate request for $MYCERT..."
+    openssl req -new -nodes -out $MYCERT.csr.pem -newkey rsa:4096 -keyout $MYCERT.key.pem -subj "/CN=$MYCERT/O=$O/L=$L/ST=$ST/C=$C"
+else
+    echo "ERROR: certificate for $MYCERT already exists."
+    exit 1
+fi
+
+# write an ext file for the request
+cat > $MYCERT.v3.ext << EOF
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = $MYCERT
+DNS.2 = $MYSHORTNAME
+EOF
+
+
+# sign the cert w/the CA cert using the options in the ext file
+echo "Signing certificate request for $MYCERT..."
+openssl x509 -req -in $MYCERT.csr.pem -CA $CANAME.cert.pem -CAkey $CANAME.key.pem -CAcreateserial -out $MYCERT.cert.pem -days 730 -sha256 -extfile $MYCERT.v3.ext 
+
+if [ $? -eq 0 ]
+then
+    # show our work by displaying the new cert 's info
+    echo "Certificate generation for $MYCERT successful."
+    echo "Certificate info:"
+    openssl x509 -text -in $MYCERT.cert.pem
+else
+    # didn't work!
+    echo "ERROR signing certificate for $MYCERT."
+    exit $?
+fi
+

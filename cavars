@@ -1,0 +1,15 @@
+# name of CA 
+CANAME="My-RootCA"
+
+# organization
+O="My Organization"
+
+# city
+L="My City"
+
+# state/province
+ST="My State"
+
+# two-digit country code
+C="US"
+

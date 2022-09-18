@@ -2,12 +2,27 @@
 
 . ./cavars
 
-MYCERT=$1
-MYSHORTNAME=$(echo $MYCERT|cut -d. -f1)
-MYIP=$2
+declare -a san
+san=( "$@" )
 
-echo "FQDN=$MYCERT"
-echo "SHORTNAME=$MYSHORTNAME"
+# first name is the "name" of the cert
+# it will end up in the subject field as well as the subjectAltNames
+MYCERT=$1
+# add shortnames
+for n in "$@"
+do
+    if [[ $(echo $n|cut -d. -f1) != '*' ]]
+    then
+        san+=($(echo $n|cut -d. -f1))
+    fi
+done
+
+echo "Certificate subject and alternate names:"
+for n in "${san[@]}"
+do
+    echo $n
+done
+echo " "
 
 # create cert request (unless there already *is* a request!)
 if [ ! -f "$MYCERT.csr.pem" ]
@@ -27,10 +42,15 @@ keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
 subjectAltName = @alt_names
 
 [alt_names]
-DNS.1 = $MYCERT
-DNS.2 = $MYSHORTNAME
 EOF
 
+sancnt=${#san[*]}
+for ((i=0; i<$sancnt; i++))
+do
+    cat >> $MYCERT.v3.ext << EOF
+DNS.${i} = ${san[$i]}
+EOF
+done
 
 # sign the cert w/the CA cert using the options in the ext file
 echo "Signing certificate request for $MYCERT..."

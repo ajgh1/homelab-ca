@@ -8,6 +8,14 @@ san=( "$@" )
 # first name is the "name" of the cert
 # it will end up in the subject field as well as the subjectAltNames
 MYCERT=$1
+# wildcard cert can't be the only cert #FIXME:will try to fix later
+if [[ $(echo $MYCERT|cut -d. -f1) == '*' ]]
+then
+    echo "Certificate filenames cannot be wildcards."
+    echo "Specify a single fully qualified domain name first."
+    exit 1
+fi
+
 # add shortnames
 for n in "$@"
 do

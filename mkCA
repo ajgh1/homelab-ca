@@ -9,18 +9,18 @@ cd "$CANAME"
 # generate the private key;
 # you will be prompted to set a password
 echo "Generating CA private key..."
-openssl genrsa -aes256 -out $CANAME.key.pem 4096
+openssl genrsa -aes256 -out "$CANAME.key.pem" 4096
 
 # now generate the CA certificate request and sign it
 # you will need to supply the key password you just set above
 echo "Generating the CA root certificate..."
-openssl req -x509 -new -nodes -key $CANAME.key.pem -sha256 -days 3650 -out $CANAME.cert.pem -subj "/C=$C/ST=$ST/L=$L/O=$O/CN=$CANAME"
+openssl req -x509 -new -nodes -key "$CANAME.key.pem" -sha256 -days 3650 -out "$CANAME.cert.pem" -subj "/C=$C/ST=$ST/L=$L/O=$O/CN=$CANAME"
 
 if [ $? -eq 0 ]
 then
     echo "CA root certificate created."
     echo "Certificate info:"
-    openssl x509 -text -in $CANAME.cert.pem
+    openssl x509 -text -in "$CANAME.cert.pem"
 else
     echo "ERROR generating CA root certificate."
     exit $?

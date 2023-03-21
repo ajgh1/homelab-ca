@@ -62,7 +62,7 @@ done
 
 # sign the cert w/the CA cert using the options in the ext file
 echo "Signing certificate request for $MYCERT..."
-openssl x509 -req -in $MYCERT.csr.pem -CA $CANAME.cert.pem -CAkey $CANAME.key.pem -CAcreateserial -out $MYCERT.cert.pem -days 730 -sha256 -extfile $MYCERT.v3.ext 
+openssl x509 -req -in $MYCERT.csr.pem -CA "$CANAME.cert.pem" -CAkey "$CANAME.key.pem" -CAcreateserial -out $MYCERT.cert.pem -days 730 -sha256 -extfile $MYCERT.v3.ext 
 
 if [ $? -eq 0 ]
 then

@@ -36,7 +36,7 @@ echo " "
 if [ ! -f "$MYCERT.csr.pem" ]
 then
     echo "Generating certificate request for $MYCERT..."
-    openssl req -new -nodes -out $MYCERT.csr.pem -newkey rsa:4096 -keyout $MYCERT.key.pem -subj "/CN=$MYCERT/O=$O/L=$L/ST=$ST/C=$C"
+    openssl req -new -nodes -out $MYCERT.csr.pem -newkey rsa:4096 -keyout $MYCERT.key.pem -subj "/C=$C/ST=$ST/L=$L/O=$O/CN=$MYCERT"
 else
     echo "ERROR: certificate for $MYCERT already exists."
     exit 1
